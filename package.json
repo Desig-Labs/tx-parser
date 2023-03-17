@@ -1,7 +1,7 @@
 {
-  "name": "@michael-template/template-typescript-library",
+  "name": "@desig/tx-parser",
   "version": "1.0.3",
-  "description": "template-typescript-library",
+  "description": "Web3 transaction parser multi chain",
   "main": "dist/index.js",
   "publishConfig": {
     "access": "public",
