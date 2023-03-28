@@ -1,9 +1,14 @@
-import { Idl } from "@project-serum/anchor";
+import { Idl } from "@coral-xyz/anchor";
 
-export type DecodeType = {
+export type ResultData = {
   type: string;
   name: string;
   data: string;
+};
+
+export type DecodeType = {
+  name: string;
+  result: ResultData[];
 };
 
 export enum Chain {
@@ -11,10 +16,12 @@ export enum Chain {
   Solana,
 }
 
+export type DecodeProps = {
+  contractAddress: string;
+  txData: string | Buffer;
+  IDL?: Idl;
+};
+
 export interface TxParserInterface {
-  decode: (props: {
-    contractAddress: string;
-    txData: string;
-    IDL?: Idl;
-  }) => Promise<any>;
+  decode: (props: DecodeProps) => Promise<DecodeType>;
 }

@@ -1,13 +1,18 @@
 import axios from "axios";
-import { Interface, Result } from "ethers";
+import { Interface, Result, Transaction } from "ethers";
 
-import { DecodeType, TxParserInterface } from "../types";
+import {
+  DecodeProps,
+  DecodeType,
+  ResultData,
+  TxParserInterface,
+} from "../types";
 
 const END_INDEX_SELECTOR = 10;
 
 export class EthereumTxParser implements TxParserInterface {
   private formatData = (fragmentData: any, decodeData: Result) => {
-    const result: Array<DecodeType> = [];
+    const result: Array<ResultData> = [];
     const inputs = fragmentData.inputs;
 
     for (let i = 0; i < decodeData.length; i++) {
@@ -33,10 +38,7 @@ export class EthereumTxParser implements TxParserInterface {
     return result;
   };
 
-  decode = async (props: {
-    contractAddress: string;
-    txData: string;
-  }): Promise<DecodeType[]> => {
+  decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress, txData } = props;
     const res = await axios.get(
       `https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}`
@@ -48,10 +50,12 @@ export class EthereumTxParser implements TxParserInterface {
     const contractABI = JSON.parse(jsonABI);
     const itf = Interface.from(contractABI);
     const fragments = itf.fragments;
-    const name = itf.getFunctionName(txData.slice(0, END_INDEX_SELECTOR));
+    const name = itf.getFunctionName(
+      txData.toString().slice(0, END_INDEX_SELECTOR)
+    );
     const decodeData = itf.decodeFunctionData(name, txData);
 
-    let result: DecodeType[] = [];
+    let result: ResultData[] = [];
     for (const fragment of fragments) {
       if (fragment.type !== "function") continue;
       const fragmentData = JSON.parse(fragment.format("json"));
@@ -60,6 +64,6 @@ export class EthereumTxParser implements TxParserInterface {
         break;
       }
     }
-    return result;
+    return { name, result };
   };
 }

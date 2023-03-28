@@ -1,15 +1,6 @@
-import { EthereumTxParser } from "./ethereum";
-import { SolanaTxParser } from "./solana";
-import { Chain, TxParserInterface } from "./types";
+import TxParser from "./core";
 
-const ParserProvider: Record<string, TxParserInterface> = {
-  [Chain.Ethereum]: new EthereumTxParser(),
-  [Chain.Solana]: new SolanaTxParser(),
-};
-class TxParser {
-  private _provider: TxParserInterface;
-  constructor(chain: Chain) {
-    this._provider = ParserProvider[chain];
-  }
-}
+export * from "./types";
+export * from "./core";
+
 export default TxParser;
