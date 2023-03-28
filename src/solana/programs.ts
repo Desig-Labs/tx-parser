@@ -1,4 +1,14 @@
-import { AnchorProvider, BorshInstructionCoder, Idl, Spl, Wallet, web3, SplTokenCoder, Coder, Program } from "@project-serum/anchor";
+import {
+  AnchorProvider,
+  BorshInstructionCoder,
+  Idl,
+  Spl,
+  Wallet,
+  web3,
+  SplTokenCoder,
+  Coder,
+  Program,
+} from "@project-serum/anchor";
 
 import SplTokenIDL, { SPL_TOKEN_PROGRAM_ID } from "./spl-token.idl";
 
