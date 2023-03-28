@@ -33,7 +33,7 @@ export class SolanaTxParser implements TxParserInterface {
 
     const pubProgramId = translateAddress(programId);
     const idlAddr = await idlAddress(pubProgramId);
-    const connection = new Connection(clusterApiUrl("devnet"));
+    const connection = new Connection(clusterApiUrl("mainnet-beta"));
     const idlAccountInfo = await connection.getAccountInfo(idlAddr);
     if (!idlAccountInfo) return null;
 

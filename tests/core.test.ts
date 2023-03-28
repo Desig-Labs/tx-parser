@@ -26,7 +26,7 @@ describe("Tx Parser", function () {
     const PROGRAM_LUCKY_WHEEL = "38k8ejgfKJ2VKRApCMkev1hQwqobTTZPLnX11t2dxAXA";
     const SIG_LUCKY_WHEEL =
       "53LsUMLspuuSiw57rk1hSgPQoFQBgkKgZCjbcKh9yo93x19ryFA8JnM5HuE7N6oLf6WPTfLdrgHpbAgJfZjY7dHv";
-    const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
+    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
     const tx = await connection.getTransaction(SIG_LUCKY_WHEEL);
 
     const result = await solParser.decode({
