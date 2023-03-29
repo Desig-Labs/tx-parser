@@ -57,13 +57,12 @@ export class SolanaTxParser implements TxParserInterface {
     const decodedData: any = coder.instruction.decode(data, "base58");
     if (!decodedData) throw new Error("Can't parse this transaction");
     // Format data
-    if (decodedData)
-      for (const key in decodedData.data)
-        result.push({
-          data: decodedData.data[key].toString(),
-          name: key,
-          type: this.getDataType(decodedData.data[key]),
-        });
+    for (const key in decodedData.data)
+      result.push({
+        data: decodedData.data[key].toString(),
+        name: key,
+        type: this.getDataType(decodedData.data[key]),
+      });
 
     return { name: decodedData.name, result };
   };
