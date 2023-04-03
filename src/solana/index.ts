@@ -6,7 +6,6 @@ import {
 } from "@coral-xyz/anchor/dist/cjs/idl";
 import { inflate } from "pako";
 import { bs58, utf8 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { Connection, clusterApiUrl } from "@solana/web3.js";
 
 import {
   DecodeProps,
@@ -33,7 +32,7 @@ export class SolanaTxParser implements TxParserInterface {
 
     const pubProgramId = translateAddress(programId);
     const idlAddr = await idlAddress(pubProgramId);
-    const connection = new Connection(clusterApiUrl("mainnet-beta"));
+    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
     const idlAccountInfo = await connection.getAccountInfo(idlAddr);
     if (!idlAccountInfo) return null;
 
