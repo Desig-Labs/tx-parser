@@ -1,9 +1,10 @@
+import { TxnBuilderTypes } from "aptos";
 import axios from "axios";
 import { Interface, Result } from "ethers";
 
 import {
-  DecodeProps,
   DecodeType,
+  DecodeProps,
   ResultData,
   TxParserInterface,
 } from "../types";
@@ -40,6 +41,9 @@ export class EthereumTxParser implements TxParserInterface {
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress, txData } = props;
+    if (txData instanceof TxnBuilderTypes.RawTransaction)
+      throw new Error("Invalid type TxData!");
+
     const res = await axios.get(
       `https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}`
     );

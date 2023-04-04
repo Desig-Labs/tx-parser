@@ -13,6 +13,7 @@ import {
   ResultData,
   TxParserInterface,
 } from "../types";
+import { TxnBuilderTypes } from "aptos";
 export class SolanaTxParser implements TxParserInterface {
   private getDataType = (data: any): string => {
     if (data instanceof BN) return "BN";
@@ -32,7 +33,7 @@ export class SolanaTxParser implements TxParserInterface {
 
     const pubProgramId = translateAddress(programId);
     const idlAddr = await idlAddress(pubProgramId);
-    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
+    const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
     const idlAccountInfo = await connection.getAccountInfo(idlAddr);
     if (!idlAccountInfo) return null;
 
@@ -43,11 +44,14 @@ export class SolanaTxParser implements TxParserInterface {
   };
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
-    const { contractAddress, txData, IDL } = props;
-    const coder = await this.getProvider({ programId: contractAddress, IDL });
+    const { contractAddress: programId, txData, IDL } = props;
+    if (txData instanceof TxnBuilderTypes.RawTransaction)
+      throw new Error("Invalid type TxData!");
+
+    const coder = await this.getProvider({ programId, IDL });
     if (!coder)
       throw new Error(
-        `Not found IDL from programID:${contractAddress}, please add IDL or upload to explorer`
+        `Not found IDL from programID:${programId}, please add IDL or upload to explorer`
       );
     let data = txData;
     const result: Array<ResultData> = [];
