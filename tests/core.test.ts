@@ -1,7 +1,7 @@
 import { web3 } from "@coral-xyz/anchor";
-import { AptosAccount, AptosClient, FaucetClient } from "aptos";
-import { CosmWasmClient } from "cosmwasm";
 import { decodeTxRaw } from "@cosmjs/proto-signing";
+import { CosmWasmClient } from "cosmwasm";
+import { AptosAccount, AptosClient, FaucetClient } from "aptos";
 
 import TxParser from "../dist/core";
 import { Chain } from "../dist/types";
