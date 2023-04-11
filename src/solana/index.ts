@@ -10,7 +10,7 @@ import { bs58, utf8 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import {
   DecodeProps,
   DecodeType,
-  ResultData,
+  InputData,
   TxParserInterface,
 } from "../types";
 import { TxnBuilderTypes } from "aptos";
@@ -54,10 +54,13 @@ export class SolanaTxParser implements TxParserInterface {
         `Not found IDL from programID:${programId}, please add IDL or upload to explorer`
       );
     let data = txData;
-    const result: Array<ResultData> = [];
+    const result: Array<InputData> = [];
 
     if (txData instanceof Buffer) data = bs58.encode(txData);
-    const decodedData: any = coder.instruction.decode(data, "base58");
+    const decodedData: any = coder.instruction.decode(
+      data.toString(),
+      "base58"
+    );
     if (!decodedData) throw new Error("Can't parse this transaction");
     // Format data
     for (const key in decodedData.data)
@@ -67,6 +70,6 @@ export class SolanaTxParser implements TxParserInterface {
         type: this.getDataType(decodedData.data[key]),
       });
 
-    return { name: decodedData.name, result };
+    return { name: decodedData.name, inputs: result };
   };
 }

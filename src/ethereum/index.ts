@@ -5,7 +5,7 @@ import { Interface, Result } from "ethers";
 import {
   DecodeType,
   DecodeProps,
-  ResultData,
+  InputData,
   TxParserInterface,
 } from "../types";
 
@@ -13,7 +13,7 @@ const END_INDEX_SELECTOR = 10;
 
 export class EthereumTxParser implements TxParserInterface {
   private formatData = (fragmentData: any, decodeData: Result) => {
-    const result: Array<ResultData> = [];
+    const result: Array<InputData> = [];
     const inputs = fragmentData.inputs;
 
     for (let i = 0; i < decodeData.length; i++) {
@@ -59,7 +59,7 @@ export class EthereumTxParser implements TxParserInterface {
     );
     const decodeData = itf.decodeFunctionData(name, txData);
 
-    let result: ResultData[] = [];
+    let result: InputData[] = [];
     for (const fragment of fragments) {
       if (fragment.type !== "function") continue;
       const fragmentData = JSON.parse(fragment.format("json"));
@@ -68,6 +68,6 @@ export class EthereumTxParser implements TxParserInterface {
         break;
       }
     }
-    return { name, result };
+    return { name, inputs: result };
   };
 }

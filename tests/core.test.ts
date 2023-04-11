@@ -1,12 +1,16 @@
 import { web3 } from "@coral-xyz/anchor";
 import { AptosAccount, AptosClient, FaucetClient } from "aptos";
+import { CosmWasmClient } from "cosmwasm";
+import { decodeTxRaw } from "@cosmjs/proto-signing";
 
-import TxParser, { Chain } from "../dist/index";
+import TxParser from "../dist/core";
+import { Chain } from "../dist/types";
 
 describe("Tx Parser", function () {
   let solParser = new TxParser(Chain.Solana);
   let ethParser = new TxParser(Chain.Ethereum);
   let aptosParser = new TxParser(Chain.Aptos);
+  let osmosisParser = new TxParser(Chain.Osmosis);
 
   it("Parse data on ETH", async () => {
     const TETHER_CONTRACT = "0xdac17f958d2ee523a2206206994597c13d831ec7";
@@ -22,7 +26,7 @@ describe("Tx Parser", function () {
   it("Parse data on Solana", async () => {
     const PROGRAM_LUCKY_WHEEL = "38k8ejgfKJ2VKRApCMkev1hQwqobTTZPLnX11t2dxAXA";
     const SIG_LUCKY_WHEEL =
-      "53LsUMLspuuSiw57rk1hSgPQoFQBgkKgZCjbcKh9yo93x19ryFA8JnM5HuE7N6oLf6WPTfLdrgHpbAgJfZjY7dHv";
+      "2SSpXdzES8trV1xFumwSBVCaPMvuGDgZSUde7tjDHsWqfJr3UhED3xmmV1wXoTkVNcM4zVhkGJq15E4NvDQTQwwW";
     const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
     const tx = await connection.getTransaction(SIG_LUCKY_WHEEL);
 
@@ -56,5 +60,23 @@ describe("Tx Parser", function () {
       txData: rawTx,
     });
     console.log("Aptos parse result =====>", result);
+  });
+
+  it("Parse data on Osmosis", async () => {
+    const rpcEndpoint = "https://rpc.osmosis.zone";
+    const client = await CosmWasmClient.connect(rpcEndpoint);
+    const result = await client.getTx(
+      "14A5210D6B82E178630FB9198CD5640326B9D1F2637251EE6A652A8296874842"
+    );
+    if (!result?.tx) throw new Error("Not found transaction");
+    const decodedTx = decodeTxRaw(result.tx);
+    const mes = decodedTx.body.messages[0];
+
+    const decoded = await osmosisParser.decode({
+      contractAddress: mes.typeUrl,
+      txData: mes.value,
+    });
+
+    console.log("Osmosis parse result =====>", decoded);
   });
 });

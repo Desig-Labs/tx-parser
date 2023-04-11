@@ -3,7 +3,7 @@ import { AptosClient, Types, BCS, HexString, TxnBuilderTypes } from "aptos";
 import {
   DecodeProps,
   DecodeType,
-  ResultData,
+  InputData,
   TxParserInterface,
 } from "../types";
 
@@ -77,7 +77,7 @@ export class AptosTxParser implements TxParserInterface {
     const abiPayload = abis.get(functionName);
     if (!abiPayload) throw new Error("Function not exist in the contract!");
 
-    const result: ResultData[] = [];
+    const result: InputData[] = [];
     if (abiPayload.params.includes("&signer"))
       result.push({
         data: rawTx.sender.toHexString().toString(),
@@ -94,6 +94,6 @@ export class AptosTxParser implements TxParserInterface {
       });
     }
 
-    return { name: functionName, result };
+    return { name: functionName, inputs: result };
   };
 }
