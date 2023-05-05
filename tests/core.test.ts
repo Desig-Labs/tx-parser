@@ -24,18 +24,26 @@ describe("Tx Parser", function () {
   });
 
   it("Parse data on Solana", async () => {
-    const PROGRAM_LUCKY_WHEEL = "38k8ejgfKJ2VKRApCMkev1hQwqobTTZPLnX11t2dxAXA";
+    const PROGRAM_LUCKY_WHEEL = "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB";
     const SIG_LUCKY_WHEEL =
-      "2SSpXdzES8trV1xFumwSBVCaPMvuGDgZSUde7tjDHsWqfJr3UhED3xmmV1wXoTkVNcM4zVhkGJq15E4NvDQTQwwW";
-    const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
+      "2r2BHXAJ2Vwmgmnb665Cwia1QGkQDetHmdFvxBWoLiNk6VrNLtVfFh97KsKaaM7HvjJQbhys5VZdmnq26Xt9LkRy";
+    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
     const tx = await connection.getTransaction(SIG_LUCKY_WHEEL);
+    const instructions = tx?.transaction.message.instructions || [];
 
-    const result = await solParser.decode({
-      contractAddress: PROGRAM_LUCKY_WHEEL,
-      txData: tx?.transaction.message.instructions[0].data || "",
-    });
+    for (const instruction of instructions) {
+      try {
+        const res = await solParser.decode({
+          contractAddress: PROGRAM_LUCKY_WHEEL,
+          txData: instruction.data,
+        });
+        console.log(res);
+      } catch (error) {
+        console.log("error===>", error);
+      }
+    }
 
-    console.log("Solana parse result =====>", result);
+    // console.log("Solana parse result =====>", result);
   });
 
   it("Parse data on Aptos", async () => {

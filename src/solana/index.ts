@@ -33,7 +33,7 @@ export class SolanaTxParser implements TxParserInterface {
 
     const pubProgramId = translateAddress(programId);
     const idlAddr = await idlAddress(pubProgramId);
-    const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
+    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
     const idlAccountInfo = await connection.getAccountInfo(idlAddr);
     if (!idlAccountInfo) return null;
 
@@ -65,7 +65,7 @@ export class SolanaTxParser implements TxParserInterface {
     // Format data
     for (const key in decodedData.data)
       result.push({
-        data: decodedData.data[key].toString(),
+        data: decodedData.data[key],
         name: key,
         type: this.getDataType(decodedData.data[key]),
       });
