@@ -1,4 +1,4 @@
-import { BN, BorshCoder, translateAddress, web3 } from "@coral-xyz/anchor";
+import { BorshCoder, translateAddress, web3 } from "@coral-xyz/anchor";
 import {
   decodeIdlAccount,
   Idl,
@@ -14,13 +14,13 @@ import {
   TxParserInterface,
 } from "../types";
 import { TxnBuilderTypes } from "aptos";
+import { getDataType } from "./utils";
+
 export class SolanaTxParser implements TxParserInterface {
-  private getDataType = (data: any): string => {
-    if (data instanceof BN) return "BN";
-    if (data instanceof web3.PublicKey) return "PubKey";
-    if (Buffer.isBuffer(data)) return "Buffer";
-    return typeof data;
-  };
+  rpc: string;
+  constructor(rpc: string) {
+    this.rpc = rpc;
+  }
 
   private getProvider = async ({
     programId,
@@ -33,7 +33,7 @@ export class SolanaTxParser implements TxParserInterface {
 
     const pubProgramId = translateAddress(programId);
     const idlAddr = await idlAddress(pubProgramId);
-    const connection = new web3.Connection(web3.clusterApiUrl("mainnet-beta"));
+    const connection = new web3.Connection(this.rpc);
     const idlAccountInfo = await connection.getAccountInfo(idlAddr);
     if (!idlAccountInfo) return null;
 
@@ -67,7 +67,7 @@ export class SolanaTxParser implements TxParserInterface {
       result.push({
         data: decodedData.data[key],
         name: key,
-        type: this.getDataType(decodedData.data[key]),
+        type: getDataType(decodedData.data[key]),
       });
 
     return { name: decodedData.name, inputs: result };

@@ -9,10 +9,13 @@ import { Chain } from "../dist/types";
 import { TxParser } from "../dist/core";
 
 describe("Tx Parser", function () {
-  let solParser = new TxParser(Chain.Solana);
-  let ethParser = new TxParser(Chain.Ethereum);
-  let aptosParser = new TxParser(Chain.Aptos);
-  let osmosisParser = new TxParser(Chain.Osmosis);
+  let solParser = new TxParser(
+    Chain.Solana,
+    web3.clusterApiUrl("mainnet-beta")
+  );
+  let ethParser = new TxParser(Chain.Ethereum, "https://api.etherscan.io/");
+  let aptosParser = new TxParser(Chain.Aptos, "");
+  let osmosisParser = new TxParser(Chain.Osmosis, "");
 
   it("Parse data on ETH", async () => {
     const TETHER_CONTRACT = "0xdac17f958d2ee523a2206206994597c13d831ec7";
@@ -35,19 +38,19 @@ describe("Tx Parser", function () {
 
     for (const instruction of instructions) {
       try {
-        var enc = new TextEncoder();
-        const a: TransactionInstruction = {
-          data: enc.encode(instruction.data) as any,
-          keys: instruction.accounts as any,
-          programId: SystemProgram.programId,
-        };
-        const data = decodeSystemInstruction(a);
+        // var enc = new TextEncoder();
+        // const a: TransactionInstruction = {
+        //   data: enc.encode(instruction.data) as any,
+        //   keys: instruction.accounts as any,
+        //   programId: SystemProgram.programId,
+        // };
+        // const data = decodeSystemInstruction(a);
         const res = await solParser.decode({
           contractAddress: PROGRAM_LUCKY_WHEEL,
           txData: instruction.data,
         });
 
-        console.log(data);
+        console.log(res);
       } catch (error) {
         console.log("error===>", error);
       }

@@ -4,16 +4,18 @@ import { OsmosisTxParser } from "./osmosis";
 import { SolanaTxParser } from "./solana";
 import { Chain, DecodeProps, TxParserInterface } from "./types";
 
-const ParserProvider: Record<string, TxParserInterface> = {
-  [Chain.Ethereum]: new EthereumTxParser(),
-  [Chain.Solana]: new SolanaTxParser(),
-  [Chain.Aptos]: new AptosTxParser(),
-  [Chain.Osmosis]: new OsmosisTxParser(),
-};
 export class TxParser {
   private _provider: TxParserInterface;
-  constructor(chain: Chain) {
-    this._provider = ParserProvider[chain];
+  constructor(chain: Chain, rpc: string) {
+    const parserProvider: Array<[Chain, TxParserInterface]> = [
+      [Chain.Ethereum, new EthereumTxParser(rpc)],
+      [Chain.Solana, new SolanaTxParser(rpc)],
+      [Chain.Aptos, new AptosTxParser()],
+      [Chain.Osmosis, new OsmosisTxParser()],
+    ];
+
+    const parserMap = new Map(parserProvider);
+    this._provider = parserMap.get(chain);
   }
 
   /**

@@ -12,6 +12,11 @@ import {
 const END_INDEX_SELECTOR = 10;
 
 export class EthereumTxParser implements TxParserInterface {
+  rpc: string;
+  constructor(rpc: string) {
+    this.rpc = rpc;
+  }
+
   private formatData = (fragmentData: any, decodeData: Result) => {
     const result: Array<InputData> = [];
     const inputs = fragmentData.inputs;
@@ -45,7 +50,7 @@ export class EthereumTxParser implements TxParserInterface {
       throw new Error("Invalid type TxData!");
 
     const res = await axios.get(
-      `https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}`
+      `${this.rpc}/api?module=contract&action=getabi&address=${contractAddress}`
     );
     const { result: jsonABI } = res.data;
     if (jsonABI === "Contract source code not verified")
