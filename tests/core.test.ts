@@ -2,12 +2,11 @@ import { web3 } from "@coral-xyz/anchor";
 import { decodeTxRaw } from "@cosmjs/proto-signing";
 import { CosmWasmClient } from "cosmwasm";
 import { AptosAccount, AptosClient, FaucetClient } from "aptos";
-import { decodeSystemInstruction } from "../src/solana/systemParser";
-
-import TxParser from "../dist/core";
-import { Chain } from "../dist/types";
-import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import { SystemProgram, TransactionInstruction } from "@solana/web3.js";
+
+import { decodeSystemInstruction } from "../src/solana/systemParser";
+import { Chain } from "../dist/types";
+import { TxParser } from "../dist/core";
 
 describe("Tx Parser", function () {
   let solParser = new TxParser(Chain.Solana);

@@ -10,7 +10,7 @@ const ParserProvider: Record<string, TxParserInterface> = {
   [Chain.Aptos]: new AptosTxParser(),
   [Chain.Osmosis]: new OsmosisTxParser(),
 };
-class TxParser {
+export class TxParser {
   private _provider: TxParserInterface;
   constructor(chain: Chain) {
     this._provider = ParserProvider[chain];
@@ -29,4 +29,3 @@ class TxParser {
     return await this._provider.decode(props);
   };
 }
-export default TxParser;
