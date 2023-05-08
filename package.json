@@ -1,6 +1,6 @@
 {
   "name": "@desig/tx-parser",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Web3 transaction parser multi chain",
   "main": "dist/index.js",
   "publishConfig": {
