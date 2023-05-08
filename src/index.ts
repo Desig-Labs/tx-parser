@@ -1,3 +1,6 @@
-export function functionExample(name: string): string {
-  return `function-example::${name}`;
-}
+import TxParser from "./core";
+
+export * from "./types";
+export * from "./core";
+
+export default TxParser;
