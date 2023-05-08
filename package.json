@@ -1,6 +1,6 @@
 {
   "name": "@desig/tx-parser",
-  "version": "1.0.3",
+  "version": "0.0.1",
   "description": "Web3 transaction parser multi chain",
   "main": "dist/index.js",
   "publishConfig": {
@@ -42,5 +42,8 @@
     "ts-mocha": "^9.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.3.5"
+  },
+  "engines": {
+    "node": ">=16 <=18"
   }
 }
