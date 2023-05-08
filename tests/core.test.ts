@@ -2,9 +2,12 @@ import { web3 } from "@coral-xyz/anchor";
 import { decodeTxRaw } from "@cosmjs/proto-signing";
 import { CosmWasmClient } from "cosmwasm";
 import { AptosAccount, AptosClient, FaucetClient } from "aptos";
+import { decodeSystemInstruction } from "../src/solana/systemParser";
 
 import TxParser from "../dist/core";
 import { Chain } from "../dist/types";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+import { SystemProgram, TransactionInstruction } from "@solana/web3.js";
 
 describe("Tx Parser", function () {
   let solParser = new TxParser(Chain.Solana);
@@ -33,11 +36,19 @@ describe("Tx Parser", function () {
 
     for (const instruction of instructions) {
       try {
+        var enc = new TextEncoder();
+        const a: TransactionInstruction = {
+          data: enc.encode(instruction.data) as any,
+          keys: instruction.accounts as any,
+          programId: SystemProgram.programId,
+        };
+        const data = decodeSystemInstruction(a);
         const res = await solParser.decode({
           contractAddress: PROGRAM_LUCKY_WHEEL,
           txData: instruction.data,
         });
-        console.log(res);
+
+        console.log(data);
       } catch (error) {
         console.log("error===>", error);
       }
