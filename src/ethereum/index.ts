@@ -1,6 +1,6 @@
 import { TxnBuilderTypes } from 'aptos'
 import axios from 'axios'
-import { Interface, Result } from 'ethers'
+import { Interface, Result, WebSocketProvider } from 'ethers'
 
 import { DecodeType, DecodeProps, InputData, TxParserInterface } from '../types'
 
@@ -10,6 +10,15 @@ export class EthereumTxParser implements TxParserInterface {
   rpc: string
   constructor(rpc: string) {
     this.rpc = rpc
+  }
+
+  private getEtherscanApi = () => {
+    if (this.rpc.includes('mainnet.infura.io'))
+      return 'https://api.etherscan.io'
+    if (this.rpc.includes('goerli.infura.io'))
+      return 'https://api-goerli.etherscan.io'
+    if (this.rpc.includes('sepolia.infura.io'))
+      return 'https://api-sepolia.etherscan.io'
   }
 
   private formatData = (fragmentData: any, decodeData: Result) => {
@@ -44,8 +53,13 @@ export class EthereumTxParser implements TxParserInterface {
     if (txData instanceof TxnBuilderTypes.RawTransaction)
       throw new Error('Invalid type TxData!')
 
+    const web3 = new WebSocketProvider(this.rpc)
+    const code = await web3.getCode(contractAddress)
+    if (code === '0x') return { name: 'Transfer', inputs: [] }
+
+    const etherAPI = this.getEtherscanApi()
     const res = await axios.get(
-      `${this.rpc}/api?module=contract&action=getabi&address=${contractAddress}`,
+      `${etherAPI}/api?module=contract&action=getabi&address=${contractAddress}`,
     )
     const { result: jsonABI } = res.data
     if (jsonABI === 'Contract source code not verified')

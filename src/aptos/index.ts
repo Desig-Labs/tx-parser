@@ -4,7 +4,6 @@ import { DecodeProps, DecodeType, InputData, TxParserInterface } from '../types'
 export class AptosTxParser implements TxParserInterface {
   client: AptosClient
   constructor(rpc: string) {
-    console.log('rpc: ', rpc)
     this.client = new AptosClient(rpc)
   }
 
