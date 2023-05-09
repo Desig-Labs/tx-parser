@@ -1,45 +1,45 @@
-import { BN, Idl, IdlTypes, web3 } from "@coral-xyz/anchor";
+import { BN, Idl, IdlTypes, web3 } from '@coral-xyz/anchor'
 
 /**
  * Context of logs for specific instruction
  */
 export type LogContext = {
-  rawLogs: string[];
-  errors: string[];
-  logMessages: string[];
-  dataLogs: string[];
-  programId: string;
-  depth: number;
-  id: number;
-  instructionIndex: number;
-  invokeResult?: string;
-};
+  rawLogs: string[]
+  errors: string[]
+  logMessages: string[]
+  dataLogs: string[]
+  programId: string
+  depth: number
+  id: number
+  instructionIndex: number
+  invokeResult?: string
+}
 
 export type TransactionWithLogs = {
-  logs?: string[];
-  transaction: web3.Transaction;
-};
+  logs?: string[]
+  transaction: web3.Transaction
+}
 
 /**
  * Map which keys are programIds (base58-encoded) and values are ix parsers
  */
-export type InstructionParsers = Map<string, ParserFunction<Idl, string>>;
+export type InstructionParsers = Map<string, ParserFunction<Idl, string>>
 /**
  * Function that takes transaction ix and returns parsed variant
  */
 export type ParserFunction<
   I extends Idl,
-  IxName extends InstructionNames<I>
-> = (arg: web3.TransactionInstruction) => ParsedInstruction<I, IxName>;
+  IxName extends InstructionNames<I>,
+> = (arg: web3.TransactionInstruction) => ParsedInstruction<I, IxName>
 
 /**
  * public key as base58 string, parser
  */
-export type InstructionParserInfo = [string, ParserFunction<Idl, string>];
+export type InstructionParserInfo = [string, ParserFunction<Idl, string>]
 
 export interface ParsedAccount extends web3.AccountMeta {
   /** Account name, same as in Idl, nested accounts look like `account > nestedAccount` */
-  name?: string;
+  name?: string
 }
 
 /**
@@ -47,82 +47,82 @@ export interface ParsedAccount extends web3.AccountMeta {
  */
 export type ParsedIdlArgsByInstructionName<
   I extends Idl,
-  Ix extends I["instructions"][number]
+  Ix extends I['instructions'][number],
 > = {
-  [ArgName in Ix["args"][number]["name"]]: DecodeType<
-    (Ix["args"][number] & { name: ArgName })["type"],
+  [ArgName in Ix['args'][number]['name']]: DecodeType<
+    (Ix['args'][number] & { name: ArgName })['type'],
     IdlTypes<I>
-  >;
-};
+  >
+}
 
-export type InstructionNames<I extends Idl> = I["instructions"][number]["name"];
+export type InstructionNames<I extends Idl> = I['instructions'][number]['name']
 
 export type ParsedIdlArgs<
   I extends Idl,
-  IxName extends InstructionNames<I> = InstructionNames<I>
-> = ParsedIdlArgsByInstructionName<I, IxByName<I, IxName>>;
+  IxName extends InstructionNames<I> = InstructionNames<I>,
+> = ParsedIdlArgsByInstructionName<I, IxByName<I, IxName>>
 
 export type ParsedArgs = {
-  [key: string]: unknown;
-};
+  [key: string]: unknown
+}
 
 export type UnknownInstruction = {
-  name: "unknown" | string;
-  args: { unknown: unknown };
-  accounts: ParsedAccount[];
-  programId: web3.PublicKey;
-};
+  name: 'unknown' | string
+  args: { unknown: unknown }
+  accounts: ParsedAccount[]
+  programId: web3.PublicKey
+}
 
 export type ParsedInstruction<
   I extends Idl,
-  IxName extends InstructionNames<I> = InstructionNames<I>
+  IxName extends InstructionNames<I> = InstructionNames<I>,
 > =
   | UnknownInstruction
   | ParsedIdlInstruction<I, IxName>
-  | ParsedCustomInstruction;
+  | ParsedCustomInstruction
 
 export interface ParsedCustomInstruction {
   /** Instruction name */
-  name: string;
-  programId: web3.PublicKey;
+  name: string
+  programId: web3.PublicKey
   /** Parsed arguments */
-  args: unknown;
+  args: unknown
   /** Parsed accounts */
-  accounts: ParsedAccount[];
+  accounts: ParsedAccount[]
 }
 
 export interface ParsedIdlInstruction<
   I extends Idl,
-  IxName extends InstructionNames<I> = InstructionNames<I>
+  IxName extends InstructionNames<I> = InstructionNames<I>,
 > {
   /** Instruction name */
-  name: IxName;
-  programId: web3.PublicKey;
+  name: IxName
+  programId: web3.PublicKey
   /** Parsed arguments */
-  args: ParsedIdlArgs<I, IxName>;
+  args: ParsedIdlArgs<I, IxName>
   /** Parsed accounts */
-  accounts: ParsedAccount[];
+  accounts: ParsedAccount[]
 }
 
 export interface ProgramInfoType {
-  idl: Idl;
-  programId: web3.PublicKey | string;
+  idl: Idl
+  programId: web3.PublicKey | string
 }
 
 /**
  * @private
  */
 type TypeMap = {
-  publicKey: web3.PublicKey;
-  bool: boolean;
-  string: string;
+  publicKey: web3.PublicKey
+  bool: boolean
+  string: string
 } & {
-  [K in "u8" | "i8" | "u16" | "i16" | "u32" | "i32" | "f32" | "f64"]: number;
+  [K in 'u8' | 'i8' | 'u16' | 'i16' | 'u32' | 'i32' | 'f32' | 'f64']: number
 } & {
-  [K in "u64" | "i64" | "u128" | "i128"]: BN;
-};
+  [K in 'u64' | 'i64' | 'u128' | 'i128']: BN
+}
 
-type IdlType = Idl["instructions"][number]["args"][number]["type"];
+type IdlType = Idl['instructions'][number]['args'][number]['type']
 
 /**
  * @private
@@ -130,90 +130,932 @@ type IdlType = Idl["instructions"][number]["args"][number]["type"];
 export type DecodeType<T extends IdlType, Defined> = T extends keyof TypeMap
   ? TypeMap[T]
   : T extends { defined: keyof Defined }
-  ? Defined[T["defined"]]
+  ? Defined[T['defined']]
   : T extends { option: { defined: keyof Defined } }
-  ? Defined[T["option"]["defined"]]
+  ? Defined[T['option']['defined']]
   : T extends { option: keyof TypeMap }
-  ? TypeMap[T["option"]]
+  ? TypeMap[T['option']]
   : T extends { vec: keyof TypeMap }
-  ? TypeMap[T["vec"]][]
+  ? TypeMap[T['vec']][]
   : T extends { vec: keyof Defined }
-  ? Defined[T["vec"]][]
+  ? Defined[T['vec']][]
   : T extends { array: [defined: keyof TypeMap, size: number] }
-  ? TypeMap[T["array"][0]][]
-  : unknown;
+  ? TypeMap[T['array'][0]][]
+  : unknown
 
 /**
  * Interface to get instruction by name from IDL
  */
 export type IxByName<
   I extends Idl,
-  IxName extends I["instructions"][number]["name"]
-> = I["instructions"][number] & { name: IxName };
+  IxName extends I['instructions'][number]['name'],
+> = I['instructions'][number] & { name: IxName }
 
 export type IdlAccount = {
-  name: string;
-  isMut: boolean;
-  isSigner: boolean;
-};
+  name: string
+  isMut: boolean
+  isSigner: boolean
+}
 
 export type IdlAccounts = {
-  name: string;
-  accounts: IdlAccount[];
-};
+  name: string
+  accounts: IdlAccount[]
+}
 
 /**
  * @private
  */
-export type IdlAccountItem = IdlAccounts | IdlAccount;
+export type IdlAccountItem = IdlAccounts | IdlAccount
 
 /**
  * @private
  */
 export type AssociatedTokenProgramIdlLike = {
-  name: "associated_token_program";
-  version: "1.0.3";
+  name: 'associated_token_program'
+  version: '1.0.3'
   instructions: [
     {
-      name: "createAssociatedTokenAccount";
+      name: 'createAssociatedTokenAccount'
       accounts: [
         {
-          name: "fundingAccount";
-          isMut: true;
-          isSigner: true;
+          name: 'fundingAccount'
+          isMut: true
+          isSigner: true
         },
         {
-          name: "newAccount";
-          isMut: true;
-          isSigner: false;
+          name: 'newAccount'
+          isMut: true
+          isSigner: false
         },
         {
-          name: "wallet";
-          isMut: false;
-          isSigner: false;
+          name: 'wallet'
+          isMut: false
+          isSigner: false
         },
         {
-          name: "tokenMint";
-          isMut: false;
-          isSigner: false;
+          name: 'tokenMint'
+          isMut: false
+          isSigner: false
         },
         {
-          name: "systemProgram";
-          isMut: false;
-          isSigner: false;
+          name: 'systemProgram'
+          isMut: false
+          isSigner: false
         },
         {
-          name: "tokenProgram";
-          isMut: false;
-          isSigner: false;
+          name: 'tokenProgram'
+          isMut: false
+          isSigner: false
         },
         {
-          name: "rentSysvar";
-          isMut: false;
-          isSigner: false;
-        }
-      ];
-      args: [];
-    }
-  ];
-};
+          name: 'rentSysvar'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: []
+    },
+  ]
+}
+
+export type SplToken = {
+  version: '3.3.0'
+  name: 'spl_token'
+  instructions: [
+    {
+      name: 'initializeMint'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'rent'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+        {
+          name: 'mintAuthority'
+          type: 'publicKey'
+        },
+        {
+          name: 'freezeAuthority'
+          type: {
+            defined: 'COption<Pubkey>'
+          }
+        },
+      ]
+    },
+    {
+      name: 'initializeAccount'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'rent'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'initializeMultisig'
+      accounts: [
+        {
+          name: 'multisig'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'rent'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'm'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'transfer'
+      accounts: [
+        {
+          name: 'source'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'destination'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'authority'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+      ]
+    },
+    {
+      name: 'approve'
+      accounts: [
+        {
+          name: 'source'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'delegate'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+      ]
+    },
+    {
+      name: 'revoke'
+      accounts: [
+        {
+          name: 'source'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'setAuthority'
+      accounts: [
+        {
+          name: 'owned'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+        {
+          name: 'signer'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'authorityType'
+          type: {
+            defined: 'AuthorityType'
+          }
+        },
+        {
+          name: 'newAuthority'
+          type: {
+            defined: 'COption<Pubkey>'
+          }
+        },
+      ]
+    },
+    {
+      name: 'mintTo'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+      ]
+    },
+    {
+      name: 'burn'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'authority'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+      ]
+    },
+    {
+      name: 'closeAccount'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'destination'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'freezeAccount'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'thawAccount'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'transferChecked'
+      accounts: [
+        {
+          name: 'source'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'destination'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'authority'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'approveChecked'
+      accounts: [
+        {
+          name: 'source'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'delegate'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'mintToChecked'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'owner'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'burnChecked'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'authority'
+          isMut: false
+          isSigner: true
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'initializeAccount2'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+        {
+          name: 'rent'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'owner'
+          type: 'publicKey'
+        },
+      ]
+    },
+    {
+      name: 'syncNative'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'initializeAccount3'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'owner'
+          type: 'publicKey'
+        },
+      ]
+    },
+    {
+      name: 'initializeMultisig2'
+      accounts: [
+        {
+          name: 'multisig'
+          isMut: true
+          isSigner: false
+        },
+        {
+          name: 'signer'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'm'
+          type: 'u8'
+        },
+      ]
+    },
+    {
+      name: 'initializeMint2'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: true
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'decimals'
+          type: 'u8'
+        },
+        {
+          name: 'mintAuthority'
+          type: 'publicKey'
+        },
+        {
+          name: 'freezeAuthority'
+          type: {
+            defined: 'COption<Pubkey>'
+          }
+        },
+      ]
+    },
+    {
+      name: 'getAccountDataSize'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'initializeImmutableOwner'
+      accounts: [
+        {
+          name: 'account'
+          isMut: true
+          isSigner: false
+        },
+      ]
+      args: []
+    },
+    {
+      name: 'amountToUiAmount'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'amount'
+          type: 'u64'
+        },
+      ]
+    },
+    {
+      name: 'uiAmountToAmount'
+      accounts: [
+        {
+          name: 'mint'
+          isMut: false
+          isSigner: false
+        },
+      ]
+      args: [
+        {
+          name: 'uiAmount'
+          type: {
+            defined: "&'astr"
+          }
+        },
+      ]
+    },
+  ]
+  accounts: [
+    {
+      name: 'Mint'
+      type: {
+        kind: 'struct'
+        fields: [
+          {
+            name: 'mintAuthority'
+            type: {
+              defined: 'COption<Pubkey>'
+            }
+          },
+          {
+            name: 'supply'
+            type: 'u64'
+          },
+          {
+            name: 'decimals'
+            type: 'u8'
+          },
+          {
+            name: 'isInitialized'
+            type: 'bool'
+          },
+          {
+            name: 'freezeAuthority'
+            type: {
+              defined: 'COption<Pubkey>'
+            }
+          },
+        ]
+      }
+    },
+    {
+      name: 'Account'
+      type: {
+        kind: 'struct'
+        fields: [
+          {
+            name: 'mint'
+            type: 'publicKey'
+          },
+          {
+            name: 'owner'
+            type: 'publicKey'
+          },
+          {
+            name: 'amount'
+            type: 'u64'
+          },
+          {
+            name: 'delegate'
+            type: {
+              defined: 'COption<Pubkey>'
+            }
+          },
+          {
+            name: 'state'
+            type: {
+              defined: 'AccountState'
+            }
+          },
+          {
+            name: 'isNative'
+            type: {
+              defined: 'COption<u64>'
+            }
+          },
+          {
+            name: 'delegatedAmount'
+            type: 'u64'
+          },
+          {
+            name: 'closeAuthority'
+            type: {
+              defined: 'COption<Pubkey>'
+            }
+          },
+        ]
+      }
+    },
+    {
+      name: 'Multisig'
+      type: {
+        kind: 'struct'
+        fields: [
+          {
+            name: 'm'
+            type: 'u8'
+          },
+          {
+            name: 'n'
+            type: 'u8'
+          },
+          {
+            name: 'isInitialized'
+            type: 'bool'
+          },
+          {
+            name: 'signers'
+            type: {
+              array: ['publicKey', 11]
+            }
+          },
+        ]
+      }
+    },
+  ]
+  types: [
+    {
+      name: 'AccountState'
+      type: {
+        kind: 'enum'
+        variants: [
+          {
+            name: 'Uninitialized'
+          },
+          {
+            name: 'Initialized'
+          },
+          {
+            name: 'Frozen'
+          },
+        ]
+      }
+    },
+    {
+      name: 'AuthorityType'
+      type: {
+        kind: 'enum'
+        variants: [
+          {
+            name: 'MintTokens'
+          },
+          {
+            name: 'FreezeAccount'
+          },
+          {
+            name: 'AccountOwner'
+          },
+          {
+            name: 'CloseAccount'
+          },
+        ]
+      }
+    },
+  ]
+  errors: [
+    {
+      code: 0
+      name: 'NotRentExempt'
+      msg: 'Lamport balance below rent-exempt threshold'
+    },
+    {
+      code: 1
+      name: 'InsufficientFunds'
+      msg: 'Insufficient funds'
+    },
+    {
+      code: 2
+      name: 'InvalidMint'
+      msg: 'Invalid Mint'
+    },
+    {
+      code: 3
+      name: 'MintMismatch'
+      msg: 'Account not associated with this Mint'
+    },
+    {
+      code: 4
+      name: 'OwnerMismatch'
+      msg: 'Owner does not match'
+    },
+    {
+      code: 5
+      name: 'FixedSupply'
+      msg: 'Fixed supply'
+    },
+    {
+      code: 6
+      name: 'AlreadyInUse'
+      msg: 'Already in use'
+    },
+    {
+      code: 7
+      name: 'InvalidNumberOfProvidedSigners'
+      msg: 'Invalid number of provided signers'
+    },
+    {
+      code: 8
+      name: 'InvalidNumberOfRequiredSigners'
+      msg: 'Invalid number of required signers'
+    },
+    {
+      code: 9
+      name: 'UninitializedState'
+      msg: 'State is unititialized'
+    },
+    {
+      code: 10
+      name: 'NativeNotSupported'
+      msg: 'Instruction does not support native tokens'
+    },
+    {
+      code: 11
+      name: 'NonNativeHasBalance'
+      msg: 'Non-native account can only be closed if its balance is zero'
+    },
+    {
+      code: 12
+      name: 'InvalidInstruction'
+      msg: 'Invalid instruction'
+    },
+    {
+      code: 13
+      name: 'InvalidState'
+      msg: 'State is invalid for requested operation'
+    },
+    {
+      code: 14
+      name: 'Overflow'
+      msg: 'Operation overflowed'
+    },
+    {
+      code: 15
+      name: 'AuthorityTypeNotSupported'
+      msg: 'Account does not support specified authority type'
+    },
+    {
+      code: 16
+      name: 'MintCannotFreeze'
+      msg: 'This token mint cannot freeze accounts'
+    },
+    {
+      code: 17
+      name: 'AccountFrozen'
+      msg: 'Account is frozen'
+    },
+    {
+      code: 18
+      name: 'MintDecimalsMismatch'
+      msg: 'The provided decimals value different from the Mint decimals'
+    },
+    {
+      code: 19
+      name: 'NonNativeNotSupported'
+      msg: 'Instruction does not support non-native tokens'
+    },
+  ]
+}

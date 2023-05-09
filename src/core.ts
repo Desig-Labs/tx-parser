@@ -1,23 +1,27 @@
-import { AptosTxParser } from "./aptos";
-import { EthereumTxParser } from "./ethereum";
-import { OsmosisTxParser } from "./osmosis";
-import { SolanaTxParser } from "./solana";
-import { Chain, DecodeProps, TxParserInterface } from "./types";
+import { AptosTxParser } from './aptos'
+import { EthereumTxParser } from './ethereum'
+import { OsmosisTxParser } from './osmosis'
+import { SolanaTxParser } from './solana'
+import { Chain, DecodeProps, TxParserInterface } from './types'
 
 export class TxParser {
-  private _provider: TxParserInterface;
+  private _provider: TxParserInterface
   constructor(chain: Chain, rpc: string) {
-    const parserProvider: Array<[Chain, TxParserInterface]> = [
-      [Chain.Ethereum, new EthereumTxParser(rpc)],
-      [Chain.Solana, new SolanaTxParser(rpc)],
-      [Chain.Aptos, new AptosTxParser()],
-      [Chain.Osmosis, new OsmosisTxParser()],
-    ];
-
-    const parserMap = new Map(parserProvider);
-    this._provider = parserMap.get(chain);
+    this._provider = TxParser.getProvider(chain, rpc)
   }
 
+  static getProvider = (chain: Chain, rpc: string) => {
+    switch (chain) {
+      case Chain.Ethereum:
+        return new EthereumTxParser(rpc)
+      case Chain.Solana:
+        return new SolanaTxParser(rpc)
+      case Chain.Aptos:
+        return new AptosTxParser(rpc)
+      case Chain.Osmosis:
+        return new OsmosisTxParser()
+    }
+  }
   /**
    *
    * Decode data of transaction
@@ -28,6 +32,6 @@ export class TxParser {
    */
 
   decode = async (props: DecodeProps) => {
-    return await this._provider.decode(props);
-  };
+    return await this._provider.decode(props)
+  }
 }
