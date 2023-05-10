@@ -8,7 +8,7 @@ import { TxParser } from '../dist/core'
 
 const SOLANA_RPC = web3.clusterApiUrl('devnet')
 const ETHER_SCAN_RPC =
-  'wss://mainnet.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
+  'wss://goerli.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
 const APTOS_RPC = 'https://fullnode.devnet.aptoslabs.com'
 
 describe('Tx Parser', function () {
@@ -36,7 +36,6 @@ describe('Tx Parser', function () {
     const connection = new web3.Connection(SOLANA_RPC)
     const tx = await connection.getTransaction(sig)
     const instructions = tx?.transaction.message.instructions || []
-    const buffer = [2, 0, 0, 0, 128, 150, 152, 0, 0, 0, 0, 0]
     for (const { data } of instructions) {
       try {
         const res = await solParser.decode({
