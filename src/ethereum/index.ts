@@ -1,4 +1,5 @@
 import axios from 'axios'
+import Web3 from 'web3'
 import { Interface, Result } from 'ethers'
 
 import { DecodeType, DecodeProps, InputData, TxParserInterface } from '../types'
@@ -50,7 +51,9 @@ export class EthereumTxParser implements TxParserInterface {
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress, txData } = props
 
-    if (!contractAddress) return { name: 'Transfer', inputs: [] }
+    const web3 = new Web3(this.rpc)
+    const code = await web3.eth.getCode(contractAddress)
+    if (code === '0x') return { name: 'Transfer', inputs: [] }
 
     const etherAPI = this.getEtherscanApi()
     const res = await axios.get(
