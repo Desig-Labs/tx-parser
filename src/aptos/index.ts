@@ -1,6 +1,11 @@
 import { AptosClient, Types, BCS, HexString, TxnBuilderTypes } from 'aptos'
 import { DecodeProps, DecodeType, InputData, TxParserInterface } from '../types'
 
+const { RawTransaction, AccountAddress } = TxnBuilderTypes
+const { Deserializer } = BCS
+
+const MODULE_TRANSFER =
+  '0x0000000000000000000000000000000000000000000000000000000000000001'
 export class AptosTxParser implements TxParserInterface {
   client: AptosClient
   constructor(rpc: string) {
@@ -58,13 +63,15 @@ export class AptosTxParser implements TxParserInterface {
   }
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
-    const { contractAddress, txData: rawTx } = props
-    if (!(rawTx instanceof TxnBuilderTypes.RawTransaction))
-      throw new Error('Invalid type TxData!')
+    const { contractAddress, txData } = props
+    if (!(txData instanceof Uint8Array))
+      throw new Error('Tx Data must Uint8Array')
+    const module = contractAddress === MODULE_TRANSFER ? '0x1' : contractAddress
+    const abis = await this.fetchABI(module)
 
+    const rawTx = RawTransaction.deserialize(new Deserializer(txData))
     const payload: any = rawTx.payload
     const value = payload.value
-    const abis = await this.fetchABI(contractAddress)
     const functionName = `${contractAddress}::${value.module_name.name.value}::${value.function_name.value}`
     const abiPayload = abis.get(functionName)
     if (!abiPayload) throw new Error('Function not exist in the contract!')
@@ -86,6 +93,6 @@ export class AptosTxParser implements TxParserInterface {
       })
     }
 
-    return { name: functionName, inputs: result }
+    return { name: value.function_name.value, inputs: result }
   }
 }

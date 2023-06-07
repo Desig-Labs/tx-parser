@@ -6,13 +6,13 @@ import { Chain, DecodeProps, TxParserInterface } from './types'
 
 export class TxParser {
   private _provider: TxParserInterface
-  constructor(chain: Chain, rpc: string) {
+  constructor(chain: Chain, rpc = '') {
     this._provider = TxParser.getProvider(chain, rpc)
   }
 
   static getProvider = (chain: Chain, rpc: string) => {
     switch (chain) {
-      case Chain.Ethereum:
+      case Chain.EVM:
         return new EthereumTxParser(rpc)
       case Chain.Solana:
         return new SolanaTxParser(rpc)
