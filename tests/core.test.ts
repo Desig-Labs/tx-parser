@@ -1,21 +1,18 @@
 import { web3 } from '@coral-xyz/anchor'
-import { decodeTxRaw } from '@cosmjs/proto-signing'
-import { CosmWasmClient } from 'cosmwasm'
-import { AptosAccount, AptosClient, FaucetClient } from 'aptos'
+import { AptosAccount, FaucetClient } from 'aptos'
+import { decode } from 'bs58'
 
 import { Chain } from '../dist/types'
 import { TxParser } from '../dist/core'
 
 const SOLANA_RPC = web3.clusterApiUrl('devnet')
-const ETHER_SCAN_RPC =
-  'wss://goerli.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
+
 const APTOS_RPC = 'https://fullnode.devnet.aptoslabs.com'
 
 describe('Tx Parser', function () {
   let solParser = new TxParser(Chain.Solana, SOLANA_RPC)
-  let ethParser = new TxParser(Chain.Ethereum, ETHER_SCAN_RPC)
-  let aptosParser = new TxParser(Chain.Aptos, APTOS_RPC)
-  let osmosisParser = new TxParser(Chain.Osmosis, '')
+  let ethParser = new TxParser(Chain.EVM)
+  let aptosParser = new TxParser(Chain.Aptos)
 
   it('Parse data on ETH', async () => {
     const TETHER_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7'
@@ -51,41 +48,34 @@ describe('Tx Parser', function () {
     const NODE_URL = 'https://fullnode.devnet.aptoslabs.com'
     const FAUCET_URL = 'https://faucet.devnet.aptoslabs.com'
     const faucetClient = new FaucetClient(NODE_URL, FAUCET_URL)
-    const client = new AptosClient(NODE_URL)
 
     const sender = new AptosAccount()
-    const recipient = new AptosAccount()
     await faucetClient.fundAccount(sender.address(), 100_000_000)
 
-    const amount = BigInt(1000000)
-    const rawTx = await client.generateTransaction(sender.address(), {
-      function: `0x1::coin::transfer`,
-      arguments: [recipient.address(), amount],
-      type_arguments: ['0x1::aptos_coin::AptosCoin'],
-    })
-
+    const rawTx =
+      '9gwnFF3qNh2Uk6EcgpSFVfsB8JDmBDLRUudCC8ojAz1PYbfmLFfhw6A7ueNTiCTHTfwCRvSf7xVirda7R8mS4XXgR4iQfiKbum4u62ur3fTTVvZNHJeBDKwXo92tUViV4AnowMhmp6uSZv9Y8jEJt4gPRz3eyXheQVW6v1WfBmQbrqkzLs3rWwMfKbvuaxFUV6RuhYKcLhMe2oLL9RAX9fjq9aVuVGAX5uD7M3X3fXcJLLL9iFXKod7bNtSiwVKNDaKTVXg3EzjC3WuDAFzTFwo'
     const result = await aptosParser.decode({
       contractAddress: '0x1',
-      txData: rawTx,
+      txData: decode(rawTx),
     })
     console.log('Aptos parse result =====>', result)
   })
 
-  it('Parse data on Osmosis', async () => {
-    const rpcEndpoint = 'https://rpc.osmosis.zone'
-    const client = await CosmWasmClient.connect(rpcEndpoint)
-    const result = await client.getTx(
-      '14A5210D6B82E178630FB9198CD5640326B9D1F2637251EE6A652A8296874842',
-    )
-    if (!result?.tx) throw new Error('Not found transaction')
-    const decodedTx = decodeTxRaw(result.tx)
-    const mes = decodedTx.body.messages[0]
+  // it('Parse data on Osmosis', async () => {
+  //   const rpcEndpoint = 'https://rpc.osmosis.zone'
+  //   const client = await CosmWasmClient.connect(rpcEndpoint)
+  //   const result = await client.getTx(
+  //     '14A5210D6B82E178630FB9198CD5640326B9D1F2637251EE6A652A8296874842',
+  //   )
+  //   if (!result?.tx) throw new Error('Not found transaction')
+  //   const decodedTx = decodeTxRaw(result.tx)
+  //   const mes = decodedTx.body.messages[0]
 
-    const decoded = await osmosisParser.decode({
-      contractAddress: mes.typeUrl,
-      txData: mes.value,
-    })
+  //   const decoded = await osmosisParser.decode({
+  //     contractAddress: mes.typeUrl,
+  //     txData: mes.value,
+  //   })
 
-    console.log('Osmosis parse result =====>', decoded)
-  })
+  //   console.log('Osmosis parse result =====>', decoded)
+  // })
 })

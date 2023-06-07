@@ -49,8 +49,7 @@ export class SolanaTxParser implements TxParserInterface {
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress: programId, txData, IDL } = props
-    if (txData instanceof TxnBuilderTypes.RawTransaction)
-      throw new Error('Invalid type TxData!')
+
     /** System program */
     if (programId === web3.SystemProgram.programId.toBase58()) {
       const data =

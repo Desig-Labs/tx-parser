@@ -1,5 +1,4 @@
 import { Idl } from '@coral-xyz/anchor'
-import { TxnBuilderTypes } from 'aptos'
 
 export type InputData = {
   type: string
@@ -13,15 +12,16 @@ export type DecodeType = {
 }
 
 export enum Chain {
-  Ethereum,
+  EVM,
   Solana,
   Aptos,
   Osmosis,
+  Sui,
 }
 
 export type DecodeProps = {
   contractAddress: string
-  txData: string | Buffer | TxnBuilderTypes.RawTransaction | Uint8Array
+  txData: string | Buffer | Uint8Array
   IDL?: Idl
 }
 
