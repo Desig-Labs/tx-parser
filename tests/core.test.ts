@@ -7,7 +7,7 @@ import { TxParser } from '../dist/core'
 
 const SOLANA_RPC = web3.clusterApiUrl('devnet')
 const ETHER_SCAN_RPC =
-  'wss://goerli.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
+  'wss://mainnet.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
 const APTOS_RPC = 'https://fullnode.devnet.aptoslabs.com'
 
 describe('Tx Parser', function () {
@@ -16,18 +16,15 @@ describe('Tx Parser', function () {
   let aptosParser = new TxParser(Chain.Aptos, APTOS_RPC)
 
   it('Parse data on ETH', async () => {
-    const TETHER_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    const TETHER_CONTRACT = '0x1111111254EEB25477B68fb85Ed929f73A960582'
     const TX_TRANSFER =
-      '0xa9059cbb0000000000000000000000008e4fd0a080818377adef093d99392813c3526298000000000000000000000000000000000000000000000000000000000016e0c5'
+      '0x0502b1c50000000000000000000000006b175474e89094c44da98b954eedeac495271d0f000000000000000000000000000000000000000000000000016345785d8a00000000000000000000000000000000000000000000000000000000302bad4798ab0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000140000000000000003b6d034060a26d69263ef43e9a68964ba141263f19d71d51e26b9977'
     const result = await ethParser.decode({
       contractAddress: TETHER_CONTRACT,
       txData: TX_TRANSFER,
     })
-    const result2 = await ethParser.decode({
-      contractAddress: TETHER_CONTRACT,
-      txData: TX_TRANSFER,
-    })
-    console.log('ETH parse result =====>', result, result2)
+
+    console.log('ETH parse result =====>', result)
   })
 
   it('Parse data on Solana', async () => {

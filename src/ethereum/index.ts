@@ -1,3 +1,4 @@
+import memoize from 'fast-memoize'
 import axios from 'axios'
 import Web3 from 'web3'
 import { Interface, Result } from 'ethers'
@@ -6,11 +7,20 @@ import { DecodeType, DecodeProps, InputData, TxParserInterface } from '../types'
 
 const END_INDEX_SELECTOR = 10
 
+const getABI = async (api: string, contractAddress: string) => {
+  const res = await axios.get(
+    `${api}/api?module=contract&action=getabi&address=${contractAddress}`,
+  )
+  return res.data.result
+}
+
 export class EthereumTxParser implements TxParserInterface {
   rpc: string
   constructor(rpc: string) {
     this.rpc = rpc
   }
+
+  static getABI = memoize(getABI)
 
   private getEtherscanApi = () => {
     if (this.rpc.includes('mainnet.infura.io'))
@@ -50,16 +60,12 @@ export class EthereumTxParser implements TxParserInterface {
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress, txData } = props
-
     const web3 = new Web3(this.rpc)
     const code = await web3.eth.getCode(contractAddress)
     if (code === '0x') return { name: 'Transfer', inputs: [] }
 
     const etherAPI = this.getEtherscanApi()
-    const res = await axios.get(
-      `${etherAPI}/api?module=contract&action=getabi&address=${contractAddress}`,
-    )
-    const { result: jsonABI } = res.data
+    const jsonABI = await EthereumTxParser.getABI(etherAPI, contractAddress)
     if (jsonABI === 'Contract source code not verified')
       throw new Error('Contract source code not verified')
 
