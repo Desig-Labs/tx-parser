@@ -1,5 +1,3 @@
-import memoize from 'fast-memoize'
-
 import { AptosTxParser } from './aptos'
 import { EthereumTxParser } from './ethereum'
 import { OsmosisTxParser } from './osmosis'
@@ -37,9 +35,7 @@ export class TxParser {
    * @returns Data decoded
    */
 
-  private decodeTx = async (props: DecodeProps) => {
+  decode = async (props: DecodeProps) => {
     return await this._provider.decode(props)
   }
-
-  decode = memoize(this.decodeTx)
 }
