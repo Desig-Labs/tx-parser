@@ -1,6 +1,6 @@
 {
   "name": "@desig/tx-parser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Web3 transaction parser multi chain",
   "main": "dist/index.js",
   "publishConfig": {
@@ -30,6 +30,7 @@
     "cosmjs-types": "^0.7.2",
     "cosmwasm": "^1.1.1",
     "ethers": "^6.2.1",
+    "fast-memoize": "^2.5.2",
     "mocha": "^9.2.2",
     "osmojs": "^15.1.0-rc.1",
     "pako": "^2.1.0",

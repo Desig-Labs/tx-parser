@@ -23,7 +23,11 @@ describe('Tx Parser', function () {
       contractAddress: TETHER_CONTRACT,
       txData: TX_TRANSFER,
     })
-    console.log('ETH parse result =====>', result)
+    const result2 = await ethParser.decode({
+      contractAddress: TETHER_CONTRACT,
+      txData: TX_TRANSFER,
+    })
+    console.log('ETH parse result =====>', result, result2)
   })
 
   it('Parse data on Solana', async () => {
@@ -70,7 +74,7 @@ describe('Tx Parser', function () {
   //     '14A5210D6B82E178630FB9198CD5640326B9D1F2637251EE6A652A8296874842',
   //   )
   //   if (!result?.tx) throw new Error('Not found transaction')
-  //   const decodedTx = decodeTxRaw(result.tx)
+  //   const decodedTx = decodeRaw(result.tx)
   //   const mes = decodedTx.body.messages[0]
 
   //   const decoded = await osmosisParser.decode({

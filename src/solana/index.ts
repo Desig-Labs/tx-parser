@@ -10,7 +10,6 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token'
-import { TxnBuilderTypes } from 'aptos'
 
 import { DecodeProps, DecodeType, InputData, TxParserInterface } from '../types'
 import { getDataType } from './utils'
@@ -49,7 +48,6 @@ export class SolanaTxParser implements TxParserInterface {
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress: programId, txData, IDL } = props
-
     /** System program */
     if (programId === web3.SystemProgram.programId.toBase58()) {
       const data =
