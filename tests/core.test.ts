@@ -6,13 +6,14 @@ import { Chain } from '../dist/types'
 import { TxParser } from '../dist/core'
 
 const SOLANA_RPC = web3.clusterApiUrl('devnet')
-
+const ETHER_SCAN_RPC =
+  'wss://goerli.infura.io/ws/v3/783c24a3a364474a8dbed638263dc410'
 const APTOS_RPC = 'https://fullnode.devnet.aptoslabs.com'
 
 describe('Tx Parser', function () {
   let solParser = new TxParser(Chain.Solana, SOLANA_RPC)
-  let ethParser = new TxParser(Chain.EVM)
-  let aptosParser = new TxParser(Chain.Aptos)
+  let ethParser = new TxParser(Chain.EVM, ETHER_SCAN_RPC)
+  let aptosParser = new TxParser(Chain.Aptos, APTOS_RPC)
 
   it('Parse data on ETH', async () => {
     const TETHER_CONTRACT = '0xdac17f958d2ee523a2206206994597c13d831ec7'
@@ -57,9 +58,10 @@ describe('Tx Parser', function () {
     await faucetClient.fundAccount(sender.address(), 100_000_000)
 
     const rawTx =
-      '9gwnFF3qNh2Uk6EcgpSFVfsB8JDmBDLRUudCC8ojAz1PYbfmLFfhw6A7ueNTiCTHTfwCRvSf7xVirda7R8mS4XXgR4iQfiKbum4u62ur3fTTVvZNHJeBDKwXo92tUViV4AnowMhmp6uSZv9Y8jEJt4gPRz3eyXheQVW6v1WfBmQbrqkzLs3rWwMfKbvuaxFUV6RuhYKcLhMe2oLL9RAX9fjq9aVuVGAX5uD7M3X3fXcJLLL9iFXKod7bNtSiwVKNDaKTVXg3EzjC3WuDAFzTFwo'
+      'BQhgFAiq4oqWmXMX8VgGURF2Bt8hgRbaogoJjbG4v7Jzcd2xjhCR7U5nYHrLZpELgUX7Z9FaBscNiZH1Y5KfEztn2DLHVbqEkodTXAvoRqa7T7cSdgD4pBVswk8kSBtRJcq3Ds7mukwD2oDD8fsom9pwRe4copC1t4Za8uDtmo1rHtwudGhHbgvx5mTxLmPjvk8xGv4GnymR5oYZemJn8GfpgzXnHGnuL7v3JpW4oEAARDGNYv4sXeCLbT8R3VpNVCWKzush98VAtkEVrDgTeyvuUXSYGe35jSpNrdm9jAehwuUpEDkBY'
     const result = await aptosParser.decode({
-      contractAddress: '0x1',
+      contractAddress:
+        '0x0000000000000000000000000000000000000000000000000000000000000001',
       txData: decode(rawTx),
     })
     console.log('Aptos parse result =====>', result)

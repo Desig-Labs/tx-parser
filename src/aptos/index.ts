@@ -1,7 +1,7 @@
 import { AptosClient, Types, BCS, HexString, TxnBuilderTypes } from 'aptos'
 import { DecodeProps, DecodeType, InputData, TxParserInterface } from '../types'
 
-const { RawTransaction, AccountAddress } = TxnBuilderTypes
+const { RawTransaction } = TxnBuilderTypes
 const { Deserializer } = BCS
 
 const MODULE_TRANSFER =
@@ -72,7 +72,7 @@ export class AptosTxParser implements TxParserInterface {
     const rawTx = RawTransaction.deserialize(new Deserializer(txData))
     const payload: any = rawTx.payload
     const value = payload.value
-    const functionName = `${contractAddress}::${value.module_name.name.value}::${value.function_name.value}`
+    const functionName = `${module}::${value.module_name.name.value}::${value.function_name.value}`
     const abiPayload = abis.get(functionName)
     if (!abiPayload) throw new Error('Function not exist in the contract!')
 
