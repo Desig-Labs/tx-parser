@@ -1,7 +1,10 @@
+import memoize from 'fast-memoize'
+
 import { AptosTxParser } from './aptos'
 import { EthereumTxParser } from './ethereum'
 import { OsmosisTxParser } from './osmosis'
 import { SolanaTxParser } from './solana'
+import { SuiProvider } from './sui'
 import { Chain, DecodeProps, TxParserInterface } from './types'
 
 export class TxParser {
@@ -18,10 +21,13 @@ export class TxParser {
         return new SolanaTxParser(rpc)
       case Chain.Aptos:
         return new AptosTxParser(rpc)
+      case Chain.Sui:
+        return new SuiProvider()
       case Chain.Osmosis:
         return new OsmosisTxParser()
     }
   }
+
   /**
    *
    * Decode data of transaction
@@ -31,7 +37,9 @@ export class TxParser {
    * @returns Data decoded
    */
 
-  decode = async (props: DecodeProps) => {
+  private decodeTx = async (props: DecodeProps) => {
     return await this._provider.decode(props)
   }
+
+  decode = memoize(this.decodeTx)
 }
