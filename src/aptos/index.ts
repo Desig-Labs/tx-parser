@@ -1,3 +1,5 @@
+import memoize from 'fast-memoize'
+
 import { AptosClient, Types, BCS, HexString, TxnBuilderTypes } from 'aptos'
 import { DecodeProps, DecodeType, InputData, TxParserInterface } from '../types'
 
@@ -6,35 +8,37 @@ const { Deserializer } = BCS
 
 const MODULE_TRANSFER =
   '0x0000000000000000000000000000000000000000000000000000000000000001'
+
+const fetchABI = async (client: AptosClient, addr: string) => {
+  const modules = await client.getAccountModules(addr)
+  const abis = modules
+    .map((module) => module.abi)
+    .flatMap((abi) =>
+      abi!.exposed_functions
+        .filter((ef) => ef.is_entry)
+        .map(
+          (ef) =>
+            ({
+              fullName: `${abi!.address}::${abi!.name}::${ef.name}`,
+              ...ef,
+            } as Types.MoveFunction & { fullName: string }),
+        ),
+    )
+
+  const abiMap = new Map<string, Types.MoveFunction & { fullName: string }>()
+  abis.forEach((abi) => {
+    abiMap.set(abi.fullName, abi)
+  })
+
+  return abiMap
+}
 export class AptosTxParser implements TxParserInterface {
   client: AptosClient
   constructor(rpc: string) {
     this.client = new AptosClient(rpc)
   }
 
-  private fetchABI = async (addr: string) => {
-    const modules = await this.client.getAccountModules(addr)
-    const abis = modules
-      .map((module) => module.abi)
-      .flatMap((abi) =>
-        abi!.exposed_functions
-          .filter((ef) => ef.is_entry)
-          .map(
-            (ef) =>
-              ({
-                fullName: `${abi!.address}::${abi!.name}::${ef.name}`,
-                ...ef,
-              } as Types.MoveFunction & { fullName: string }),
-          ),
-      )
-
-    const abiMap = new Map<string, Types.MoveFunction & { fullName: string }>()
-    abis.forEach((abi) => {
-      abiMap.set(abi.fullName, abi)
-    })
-
-    return abiMap
-  }
+  private getABI = memoize(fetchABI)
 
   private decodeDataByType = (data: Uint8Array, type: string): string => {
     const { Deserializer } = BCS
@@ -67,7 +71,7 @@ export class AptosTxParser implements TxParserInterface {
     if (!(txData instanceof Uint8Array))
       throw new Error('Tx Data must Uint8Array')
     const module = contractAddress === MODULE_TRANSFER ? '0x1' : contractAddress
-    const abis = await this.fetchABI(module)
+    const abis = await this.getABI(this.client, module)
 
     const rawTx = RawTransaction.deserialize(new Deserializer(txData))
     const payload: any = rawTx.payload
