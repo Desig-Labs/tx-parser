@@ -1,3 +1,4 @@
+import memoize from 'fast-memoize'
 import { BorshCoder, translateAddress, web3 } from '@coral-xyz/anchor'
 import {
   decodeIdlAccount,
@@ -19,32 +20,36 @@ import {
   decodeTokenInstruction,
 } from './splTokenParser'
 
+const getProvider = async ({
+  programId,
+  IDL,
+  rpc,
+}: {
+  programId: string
+  rpc: string
+  IDL?: Idl
+}) => {
+  if (IDL) return new BorshCoder(IDL)
+
+  const pubProgramId = translateAddress(programId)
+  const idlAddr = await idlAddress(pubProgramId)
+  const connection = new web3.Connection(rpc)
+  const idlAccountInfo = await connection.getAccountInfo(idlAddr)
+  if (!idlAccountInfo) return null
+
+  const idlAccount = decodeIdlAccount(idlAccountInfo.data.slice(8)) // chop off discriminator
+  const inflatedIdl = inflate(idlAccount.data)
+  const idlJson: Idl = JSON.parse(utf8.decode(inflatedIdl))
+  return new BorshCoder(idlJson)
+}
+
 export class SolanaTxParser implements TxParserInterface {
   rpc: string
   constructor(rpc: string) {
     this.rpc = rpc
   }
 
-  private getProvider = async ({
-    programId,
-    IDL,
-  }: {
-    programId: string
-    IDL?: Idl
-  }) => {
-    if (IDL) return new BorshCoder(IDL)
-
-    const pubProgramId = translateAddress(programId)
-    const idlAddr = await idlAddress(pubProgramId)
-    const connection = new web3.Connection(this.rpc)
-    const idlAccountInfo = await connection.getAccountInfo(idlAddr)
-    if (!idlAccountInfo) return null
-
-    const idlAccount = decodeIdlAccount(idlAccountInfo.data.slice(8)) // chop off discriminator
-    const inflatedIdl = inflate(idlAccount.data)
-    const idlJson: Idl = JSON.parse(utf8.decode(inflatedIdl))
-    return new BorshCoder(idlJson)
-  }
+  private getProvider = memoize(getProvider)
 
   decode = async (props: DecodeProps): Promise<DecodeType> => {
     const { contractAddress: programId, txData, IDL } = props
@@ -65,7 +70,7 @@ export class SolanaTxParser implements TxParserInterface {
       return decodeAssociatedTokenInstruction()
     }
 
-    const coder = await this.getProvider({ programId, IDL })
+    const coder = await this.getProvider({ programId, rpc: this.rpc, IDL })
     if (!coder)
       throw new Error(
         `Not found IDL from programID:${programId}, please add IDL or upload to explorer`,
