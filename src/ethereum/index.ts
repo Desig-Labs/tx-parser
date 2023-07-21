@@ -3,9 +3,29 @@ import axios from 'axios'
 import Web3 from 'web3'
 import { Interface, Result } from 'ethers'
 
-import { DecodeType, DecodeProps, InputData, TxParserInterface } from '../types'
+import {
+  DecodeType,
+  DecodeProps,
+  InputData,
+  TxParserInterface,
+  HexString,
+} from '../types'
 
 const END_INDEX_SELECTOR = 10
+
+const API_SCAN: Record<HexString, string> = {
+  '0x1': 'https://api.etherscan.io',
+  '0x5': 'https://api-goerli.etherscan.io',
+  '0xaa36a7': 'https://api-sepolia.etherscan.io',
+  '0x38': 'https://api.bscscan.com',
+  '0x61': 'https://api.testnet.bscscan.com',
+  '0xe708': 'https://api.lineascan.build',
+  '0xe704': 'https://rpc.goerli.linea.build',
+  '0x44d': 'https://api-zkevm.polygonscan.com',
+  '0x5a2': 'https://api-testnet-zkevm.polygonscan.com',
+  '0x504': 'https://api-moonbeam.moonscan.io',
+  '0x507': 'https://api-moonbase.moonscan.io',
+}
 
 const getABI = async (api: string, contractAddress: string) => {
   const res = await axios.get(
@@ -16,19 +36,17 @@ const getABI = async (api: string, contractAddress: string) => {
 
 export class EthereumTxParser implements TxParserInterface {
   rpc: string
-  constructor(rpc: string) {
+  chainId?: HexString
+  constructor(rpc: string, chainId?: HexString) {
     this.rpc = rpc
+    this.chainId = chainId
   }
 
   static getABI = memoize(getABI)
 
   private getEtherscanApi = () => {
-    if (this.rpc.includes('mainnet.infura.io'))
-      return 'https://api.etherscan.io'
-    if (this.rpc.includes('goerli.infura.io'))
-      return 'https://api-goerli.etherscan.io'
-    if (this.rpc.includes('sepolia.infura.io'))
-      return 'https://api-sepolia.etherscan.io'
+    const chainId = this.chainId ? this.chainId : '0x1'
+    return API_SCAN[chainId] || ''
   }
 
   private formatData = (fragmentData: any, decodeData: Result) => {
@@ -65,6 +83,8 @@ export class EthereumTxParser implements TxParserInterface {
     if (code === '0x') return { name: 'Transfer', inputs: [] }
 
     const etherAPI = this.getEtherscanApi()
+    if (!etherAPI) return { name: '', inputs: [] }
+
     const jsonABI = await EthereumTxParser.getABI(etherAPI, contractAddress)
     if (jsonABI === 'Contract source code not verified')
       throw new Error('Contract source code not verified')

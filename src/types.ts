@@ -28,3 +28,5 @@ export type DecodeProps = {
 export interface TxParserInterface {
   decode: (props: DecodeProps) => Promise<DecodeType>
 }
+
+export type HexString = string
