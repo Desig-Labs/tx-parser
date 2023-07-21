@@ -3,18 +3,18 @@ import { EthereumTxParser } from './ethereum'
 import { OsmosisTxParser } from './osmosis'
 import { SolanaTxParser } from './solana'
 import { SuiProvider } from './sui'
-import { Chain, DecodeProps, TxParserInterface } from './types'
+import { Chain, DecodeProps, HexString, TxParserInterface } from './types'
 
 export class TxParser {
   private _provider: TxParserInterface
-  constructor(chain: Chain, rpc = '') {
-    this._provider = TxParser.getProvider(chain, rpc)
+  constructor(chain: Chain, rpc = '', chainId?: HexString) {
+    this._provider = TxParser.getProvider(chain, rpc, chainId)
   }
 
-  static getProvider = (chain: Chain, rpc: string) => {
+  static getProvider = (chain: Chain, rpc: string, chainId?: HexString) => {
     switch (chain) {
       case Chain.EVM:
-        return new EthereumTxParser(rpc)
+        return new EthereumTxParser(rpc, chainId)
       case Chain.Solana:
         return new SolanaTxParser(rpc)
       case Chain.Aptos:

@@ -53,7 +53,8 @@ describe('Tx Parser', function () {
 
     const sender = new AptosAccount()
     await faucetClient.fundAccount(sender.address(), 100_000_000)
-
+    const rawTx1 =
+      'BQhgFAiq4oqWmXMX8VgGURF2Bt8hgRbaogoJjbG4v7Jzd9eNtj7h926E5GVs4hPrwThFdg4QDCaywNthZBBFYjTWkfeMWsDGBYQ3HVwzCFDbnH4xAhyBRvfzXNFsbT2TwoJmUjjExUAprK9YsczkCf8Ncx13UaK3zsqFZnopUWKvE4ZUtdjF98Tfh28Ny8aTXywcCzjduRaAeSERrV54Ls786y4JX7xoT3kw6Tt8R9bWxDsyr37TFJvjbhvhHy2N5skqSgXw9TKvPGdQc96sxNqEQLHxAipPwUgYzgU1FQyCbqWP2iP2y'
     const rawTx =
       'BQhgFAiq4oqWmXMX8VgGURF2Bt8hgRbaogoJjbG4v7Jzcd2xjhCR7U5nYHrLZpELgUX7Z9FaBscNiZH1Y5KfEztn2DLHVbqEkodTXAvoRqa7T7cSdgD4pBVswk8kSBtRJcq3Ds7mukwD2oDD8fsom9pwRe4copC1t4Za8uDtmo1rHtwudGhHbgvx5mTxLmPjvk8xGv4GnymR5oYZemJn8GfpgzXnHGnuL7v3JpW4oEAARDGNYv4sXeCLbT8R3VpNVCWKzush98VAtkEVrDgTeyvuUXSYGe35jSpNrdm9jAehwuUpEDkBY'
     const result = await aptosParser.decode({
@@ -61,7 +62,12 @@ describe('Tx Parser', function () {
         '0x0000000000000000000000000000000000000000000000000000000000000001',
       txData: decode(rawTx),
     })
-    console.log('Aptos parse result =====>', result)
+    const result1 = await aptosParser.decode({
+      contractAddress:
+        '0x0000000000000000000000000000000000000000000000000000000000000001',
+      txData: decode(rawTx1),
+    })
+    console.log('Aptos parse result =====>', result, result1)
   })
 
   // it('Parse data on Osmosis', async () => {
