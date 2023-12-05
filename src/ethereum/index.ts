@@ -56,6 +56,7 @@ export class EthereumTxParser implements TxParserInterface {
   }
 
   static getABI = memoize(getABI)
+  static isErc20 = memoize(isErc20Token)
 
   private getEtherscanApi = () => {
     const chainId = this.chainId ? this.chainId : '0x1'
@@ -96,7 +97,7 @@ export class EthereumTxParser implements TxParserInterface {
     if (code === '0x') return { name: 'Transfer', inputs: [] }
 
     let contractABI
-    const isErc20 = await isErc20Token(contractAddress, this.rpc)
+    const isErc20 = await EthereumTxParser.isErc20(contractAddress, this.rpc)
     if (isErc20.valid) contractABI = ERC20_ABI
     else {
       const etherAPI = this.getEtherscanApi()
