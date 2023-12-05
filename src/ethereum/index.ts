@@ -97,7 +97,6 @@ export class EthereumTxParser implements TxParserInterface {
 
     let contractABI
     const isErc20 = await isErc20Token(contractAddress, this.rpc)
-    console.log(isErc20)
     if (isErc20.valid) contractABI = ERC20_ABI
     else {
       const etherAPI = this.getEtherscanApi()
