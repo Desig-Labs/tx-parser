@@ -1,6 +1,6 @@
 {
   "name": "@desig/tx-parser",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Web3 transaction parser multi chain",
   "main": "dist/index.js",
   "publishConfig": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "nodemon src/index.ts",
-    "build": "npm run clean && tsc",
+    "build": "yarn clean && tsc",
     "clean": "rm -rf ./dist",
     "predeploy": "typedoc --excludePrivate --excludeProtected src/index.ts",
     "test": "mocha --require ts-node/register --experimental-fetch -t 120000 tests/*.test.ts"

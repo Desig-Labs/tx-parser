@@ -1,7 +1,7 @@
 import memoize from 'fast-memoize'
 import axios from 'axios'
 import Web3 from 'web3'
-import { Interface, Result } from 'ethers'
+import { Contract, Interface, JsonRpcProvider, Result } from 'ethers'
 
 import {
   DecodeType,
@@ -10,6 +10,7 @@ import {
   TxParserInterface,
   HexString,
 } from '../types'
+import { ERC20_ABI } from './erc20.abi'
 
 const END_INDEX_SELECTOR = 10
 
@@ -25,6 +26,18 @@ const API_SCAN: Record<HexString, string> = {
   '0x5a2': 'https://api-testnet-zkevm.polygonscan.com',
   '0x504': 'https://api-moonbeam.moonscan.io',
   '0x507': 'https://api-moonbase.moonscan.io',
+}
+
+const isErc20Token = async (address: string, rpc: string) => {
+  try {
+    const provider = new JsonRpcProvider(rpc)
+    const contract = new Contract(address, ERC20_ABI, provider)
+    await contract.totalSupply()
+    const decimals = await contract.decimals()
+    return { valid: true, decimals: Number(decimals.toString()) }
+  } catch (error) {
+    return { valid: false, decimals: 0 }
+  }
 }
 
 const getABI = async (api: string, contractAddress: string) => {
@@ -82,14 +95,19 @@ export class EthereumTxParser implements TxParserInterface {
     const code = await web3.eth.getCode(contractAddress)
     if (code === '0x') return { name: 'Transfer', inputs: [] }
 
-    const etherAPI = this.getEtherscanApi()
-    if (!etherAPI) return { name: '', inputs: [] }
+    let contractABI
+    const isErc20 = await isErc20Token(contractAddress, this.rpc)
+    console.log(isErc20)
+    if (isErc20.valid) contractABI = ERC20_ABI
+    else {
+      const etherAPI = this.getEtherscanApi()
+      if (!etherAPI) return { name: '', inputs: [] }
+      const jsonABI = await EthereumTxParser.getABI(etherAPI, contractAddress)
+      if (jsonABI === 'Contract source code not verified')
+        throw new Error('Contract source code not verified')
+      contractABI = JSON.parse(jsonABI)
+    }
 
-    const jsonABI = await EthereumTxParser.getABI(etherAPI, contractAddress)
-    if (jsonABI === 'Contract source code not verified')
-      throw new Error('Contract source code not verified')
-
-    const contractABI = JSON.parse(jsonABI)
     const itf = Interface.from(contractABI)
     const fragments = itf.fragments
     const name = itf.getFunctionName(
